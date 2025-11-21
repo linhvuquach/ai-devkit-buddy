@@ -1,0 +1,12 @@
+node_modules/
+dist/
+*.log
+.DS_Store
+.env
+*.tsbuildinfo
+.ai-devkit.json
+.cursor/
+.claude/
+docs/ai/
+AGENTS.md
+package-lock.json

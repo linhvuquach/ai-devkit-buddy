@@ -1,0 +1,37 @@
+{
+  "name": "ai-devkit-buddy",
+  "version": "0.1.0",
+  "description": "An npm package to generate prompt templates for AI agents",
+  "main": "dist/index.js",
+  "bin": {
+    "ai-devkit-buddy": "bin/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "test": "vitest"
+  },
+  "keywords": [
+    "ai",
+    "prompt",
+    "generator",
+    "cursor",
+    "claude"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cac": "^6.7.14",
+    "fs-extra": "^11.2.0",
+    "picocolors": "^1.0.0",
+    "@inquirer/prompts": "^3.3.0"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "^20.11.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3",
+    "vitest": "^1.2.0"
+  }
+}
