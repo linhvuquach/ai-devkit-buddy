@@ -9,4 +9,3 @@ dist/
 .claude/
 docs/ai/
 AGENTS.md
-package-lock.json
