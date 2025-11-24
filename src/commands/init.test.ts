@@ -15,7 +15,9 @@ describe("init command", () => {
   it("should generate cursor prompts when cursor is selected", async () => {
     // Mock user selection
     vi.spyOn(prompts, "select").mockResolvedValue("cursor");
-    vi.spyOn(prompts, "checkbox").mockResolvedValue(["requirements"]);
+    vi.spyOn(prompts, "checkbox").mockResolvedValue([
+      "refine-new-us-azure-devops",
+    ]);
 
     // Mock fs existence check
     vi.spyOn(fs, "existsSync").mockReturnValue(true);
@@ -27,15 +29,19 @@ describe("init command", () => {
       expect.stringContaining(".cursor/commands")
     );
     expect(fs.copy).toHaveBeenCalledWith(
-      expect.stringContaining("src/templates/requirements.md"),
-      expect.stringContaining(".cursor/commands/requirements.md")
+      expect.stringContaining(
+        "src/templates/commands/refine-new-us-azure-devops.md"
+      ),
+      expect.stringContaining(".cursor/commands/refine-new-us-azure-devops.md")
     );
   });
 
   it("should generate claude prompts when claude is selected", async () => {
     // Mock user selection
     vi.spyOn(prompts, "select").mockResolvedValue("claude");
-    vi.spyOn(prompts, "checkbox").mockResolvedValue(["requirements"]);
+    vi.spyOn(prompts, "checkbox").mockResolvedValue([
+      "refine-new-us-azure-devops",
+    ]);
 
     // Mock fs existence check
     vi.spyOn(fs, "existsSync").mockReturnValue(true);
@@ -47,8 +53,10 @@ describe("init command", () => {
       expect.stringContaining(".claude/commands")
     );
     expect(fs.copy).toHaveBeenCalledWith(
-      expect.stringContaining("src/templates/requirements.md"),
-      expect.stringContaining(".claude/commands/requirements.md")
+      expect.stringContaining(
+        "src/templates/commands/refine-new-us-azure-devops.md"
+      ),
+      expect.stringContaining(".claude/commands/refine-new-us-azure-devops.md")
     );
   });
 });

@@ -6,11 +6,14 @@ const cli = cac("ai-devkit-buddy");
 
 cli
   .command("init", "Initialize ai-devkit-buddy in the current project")
-  .option("-e, --environment <env>", "Specify environment (cursor|claude|both)")
-  .option("-a, --all", "Initialize all phases at once")
-  .option("-p, --phases <phases>", "Comma-separated list of specific phases")
-  .action(async (options) => {
-    await init(options);
+  .option(
+    "-e, --environment <env>",
+    "Set AI environment (cursor, claude, both)"
+  )
+  .option("-a, --all", "Initialize all available types")
+  .option("-t, --types <types>", "Comma-separated list of types to initialize")
+  .action((options) => {
+    init(options);
   });
 
 cli.help();

@@ -7,16 +7,10 @@ import { updateTrackerConfig } from "../utils/tracker";
 interface InitOptions {
   environment?: string;
   all?: boolean;
-  phases?: string;
+  types?: string;
 }
 
-const AVAILABLE_PHASES = [
-  "requirements",
-  "design",
-  "planning",
-  "coding",
-  "review",
-];
+const AVAILABLE_TYPES = ["refine-new-us-azure-devops"];
 
 export async function init(options: InitOptions) {
   console.log(pc.green("\n🤖 AI-DevKit Buddy Initialization\n"));
@@ -33,22 +27,22 @@ export async function init(options: InitOptions) {
     });
   }
 
-  let selectedPhases: string[] = [];
+  let selectedTypes: string[] = [];
   if (options.all) {
-    selectedPhases = AVAILABLE_PHASES;
-  } else if (options.phases) {
-    selectedPhases = options.phases.split(",").map((p) => p.trim());
+    selectedTypes = AVAILABLE_TYPES;
+  } else if (options.types) {
+    selectedTypes = options.types.split(",").map((p) => p.trim());
   } else {
-    selectedPhases = await checkbox({
+    selectedTypes = await checkbox({
       message:
-        "Select phases to initialize (Press <space> to select, <a> to toggle all, <enter> to confirm):",
-      choices: AVAILABLE_PHASES.map((p) => ({ name: p, value: p })),
+        "Select types to initialize (Press <space> to select, <a> to toggle all, <enter> to confirm):",
+      choices: AVAILABLE_TYPES.map((p) => ({ name: p, value: p })),
     });
 
-    if (selectedPhases.length === 0) {
+    if (selectedTypes.length === 0) {
       console.log(
         pc.yellow(
-          "⚠️  No phases selected. You must use <space> to select phases."
+          "⚠️  No types selected. You must use <space> to select types."
         )
       );
       return;
@@ -56,17 +50,17 @@ export async function init(options: InitOptions) {
   }
 
   console.log(pc.cyan(`\nEnvironment: ${environment}`));
-  console.log(pc.cyan(`Phases: ${selectedPhases.join(", ")}\n`));
+  console.log(pc.cyan(`Types: ${selectedTypes.join(", ")}\n`));
 
   const cwd = process.cwd();
-  const templateBaseDir = path.join(__dirname, "../../src/templates");
+  const templateBaseDir = path.join(__dirname, "../../src/templates/commands");
 
-  for (const phase of selectedPhases) {
-    const templateFile = `${phase}.md`;
+  for (const type of selectedTypes) {
+    const templateFile = `${type}.md`;
     const sourcePath = path.join(templateBaseDir, templateFile);
 
     if (!fs.existsSync(sourcePath)) {
-      console.warn(pc.yellow(`Template not found for phase: ${phase}`));
+      console.warn(pc.yellow(`Template not found for type: ${type}`));
       continue;
     }
 
@@ -90,11 +84,11 @@ export async function init(options: InitOptions) {
         await fs.ensureDir(path.dirname(target.path));
         await fs.copy(sourcePath, target.path);
         console.log(
-          pc.green(`✅ Generated ${phase} template for ${target.env}`)
+          pc.green(`✅ Generated ${type} template for ${target.env}`)
         );
       } catch (error) {
         console.error(
-          pc.red(`Failed to generate ${phase} for ${target.env}:`),
+          pc.red(`Failed to generate ${type} for ${target.env}:`),
           error
         );
       }
@@ -103,6 +97,6 @@ export async function init(options: InitOptions) {
 
   await updateTrackerConfig({
     environment: environment as "cursor" | "claude" | "both",
-    initializedPhases: selectedPhases,
+    initializedTypes: selectedTypes,
   });
 }

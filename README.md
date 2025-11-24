@@ -36,7 +36,7 @@ Simply run the `init` command to start the interactive wizard:
 npx ai-devkit-buddy init
 ```
 
-Follow the prompts to select your target environment (Cursor/Claude) and the development phases you want to configure.
+Follow the prompts to select your target environment (Cursor/Claude) and the command types you want to configure.
 
 ### CLI Flags
 
@@ -46,22 +46,19 @@ You can also skip the prompts by using flags:
 # Initialize everything for Cursor
 npx ai-devkit-buddy init -e cursor -a
 
-# Initialize specific phases for both environments
-npx ai-devkit-buddy init -e both -p requirements,design
-
-# Initialize only the coding phase for Claude
-npx ai-devkit-buddy init -e claude -p coding
+# Initialize specific types for both environments
+npx ai-devkit-buddy init -e both -t refine-new-us-azure-devops
 ```
 
 #### Options
 
-| Flag            | Alias | Description                                               |
-| --------------- | ----- | --------------------------------------------------------- |
-| `--environment` | `-e`  | Target environment: `cursor`, `claude`, or `both`.        |
-| `--all`         | `-a`  | Initialize all available phases.                          |
-| `--phases`      | `-p`  | Comma-separated list of phases (e.g., `planning,coding`). |
-| `--help`        | `-h`  | Display help message.                                     |
-| `--version`     | `-v`  | Display version number.                                   |
+| Flag            | Alias | Description                                                         |
+| --------------- | ----- | ------------------------------------------------------------------- |
+| `--environment` | `-e`  | Target environment: `cursor`, `claude`, or `both`.                  |
+| `--all`         | `-a`  | Initialize all available types.                                     |
+| `--types`       | `-t`  | Comma-separated list of types (e.g., `refine-new-us-azure-devops`). |
+| `--help`        | `-h`  | Display help message.                                               |
+| `--version`     | `-v`  | Display version number.                                             |
 
 ## Generated Structure
 
@@ -72,11 +69,7 @@ Depending on your selection, the tool will generate markdown templates in the fo
 ```
 .cursor/
   └── commands/
-      ├── requirements.md
-      ├── design.md
-      ├── planning.md
-      ├── coding.md
-      └── review.md
+      └── refine-new-us-azure-devops.md
 ```
 
 **Claude**
@@ -84,20 +77,12 @@ Depending on your selection, the tool will generate markdown templates in the fo
 ```
 .claude/
   └── commands/
-      ├── requirements.md
-      ├── design.md
-      ├── planning.md
-      ├── coding.md
-      └── review.md
+      └── refine-new-us-azure-devops.md
 ```
 
-## Supported Phases
+## Supported Command Types
 
-1.  **Requirements**: Clarify user stories and acceptance criteria.
-2.  **Design**: Create architecture specs and technical designs.
-3.  **Planning**: Break down tasks and create implementation plans.
-4.  **Coding**: Best practices for implementation and refactoring.
-5.  **Review**: Checklist for code correctness, security, and performance.
+1.  **refine-new-us-azure-devops**: Refine a new user story using Azure DevOps MCP server.
 
 ## License
 
