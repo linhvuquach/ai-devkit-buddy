@@ -20,6 +20,10 @@
     "claude"
   ],
   "author": "linhvuquach",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/linhvuquach/ai-devkit-buddy"
+  },
   "license": "ISC",
   "files": [
     "dist",
