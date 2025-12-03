@@ -13,7 +13,7 @@ interface InitOptions {
 const AVAILABLE_TYPES = [
   "onboarding",
   "capture-knowledge",
-  "refine-new-us-azure-devops",
+  "ado-refine-new-us",
 ];
 
 export async function init(options: InitOptions) {

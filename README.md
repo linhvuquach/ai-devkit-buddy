@@ -47,7 +47,7 @@ You can also skip the prompts by using flags:
 npx ai-devkit-buddy init -e cursor -a
 
 # Initialize specific types for both environments
-npx ai-devkit-buddy init -e both -t refine-new-us-azure-devops
+npx ai-devkit-buddy init -e both -t ado-refine-new-us
 ```
 
 #### Options
@@ -70,7 +70,7 @@ Depending on your selection, the tool will generate markdown templates in the fo
 .cursor/
   └── commands/
       └── onboarding.md
-      └── refine-new-us-azure-devops.md
+      └── ado-refine-new-us.md
       └── capture-knowledge.md
 ```
 
@@ -80,13 +80,13 @@ Depending on your selection, the tool will generate markdown templates in the fo
 .claude/
   └── commands/
       └── onboarding.md
-      └── refine-new-us-azure-devops.md
+      └── ado-refine-new-us.md
       └── capture-knowledge.md
 ```
 
 ## Supported Command Types
 
-1.  **refine-new-us-azure-devops**: Refine a new user story using Azure DevOps MCP server.
+1.  **ado-refine-new-us**: Refine a new user story using Azure DevOps MCP server.
 2.  **capture-knowledge**: Capture knowledge of a code entry point and save it to the knowledge docs.
 
 ## License
