@@ -16,7 +16,8 @@ describe("init command", () => {
     // Mock user selection
     vi.spyOn(prompts, "select").mockResolvedValue("cursor");
     vi.spyOn(prompts, "checkbox").mockResolvedValue([
-      "refine-new-us-azure-devops",
+      "onboarding",
+      "capture-knowledge",
     ]);
 
     // Mock fs existence check
@@ -29,10 +30,12 @@ describe("init command", () => {
       expect.stringContaining(".cursor/commands")
     );
     expect(fs.copy).toHaveBeenCalledWith(
-      expect.stringContaining(
-        "src/templates/commands/refine-new-us-azure-devops.md"
-      ),
-      expect.stringContaining(".cursor/commands/refine-new-us-azure-devops.md")
+      expect.stringContaining("src/templates/commands/onboarding.md"),
+      expect.stringContaining(".cursor/commands/onboarding.md")
+    );
+    expect(fs.copy).toHaveBeenCalledWith(
+      expect.stringContaining("src/templates/commands/capture-knowledge.md"),
+      expect.stringContaining(".cursor/commands/capture-knowledge.md")
     );
   });
 
@@ -40,7 +43,8 @@ describe("init command", () => {
     // Mock user selection
     vi.spyOn(prompts, "select").mockResolvedValue("claude");
     vi.spyOn(prompts, "checkbox").mockResolvedValue([
-      "refine-new-us-azure-devops",
+      "onboarding",
+      "capture-knowledge",
     ]);
 
     // Mock fs existence check
@@ -53,10 +57,12 @@ describe("init command", () => {
       expect.stringContaining(".claude/commands")
     );
     expect(fs.copy).toHaveBeenCalledWith(
-      expect.stringContaining(
-        "src/templates/commands/refine-new-us-azure-devops.md"
-      ),
-      expect.stringContaining(".claude/commands/refine-new-us-azure-devops.md")
+      expect.stringContaining("src/templates/commands/onboarding.md"),
+      expect.stringContaining(".claude/commands/onboarding.md")
+    );
+    expect(fs.copy).toHaveBeenCalledWith(
+      expect.stringContaining("src/templates/commands/capture-knowledge.md"),
+      expect.stringContaining(".claude/commands/capture-knowledge.md")
     );
   });
 });

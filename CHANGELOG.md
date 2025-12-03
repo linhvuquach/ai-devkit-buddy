@@ -7,11 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix can't init multiple types. E.g. `-e cursor -t capture-knowledge, onboarding` should generate these types for cursor environment.
+
 ### Added
 
 - Review prompt template that review specific logic of code.
-- Check security prompt template that check security of code.
+- Check security-auditor template that check security of code.
 - Check performance prompt template that check performance of code.
+
+## [2.1.0] - 2025-11-24
+
+### Added
+
+- Add `onboarding` command that help to generate onboarding document of project.
+- Add `capture-knowledge` command that help to capture knowledge of code.
+
+### Changed
+
+- Revise the refine-new-us-azure-devops prompt template to check whether the AI assistant has already connected to the Azure DevOps MCP server.
 
 ## [2.0.0] - 2025-11-24
 

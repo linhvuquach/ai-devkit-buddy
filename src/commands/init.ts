@@ -10,7 +10,11 @@ interface InitOptions {
   types?: string;
 }
 
-const AVAILABLE_TYPES = ["refine-new-us-azure-devops"];
+const AVAILABLE_TYPES = [
+  "onboarding",
+  "capture-knowledge",
+  "refine-new-us-azure-devops",
+];
 
 export async function init(options: InitOptions) {
   console.log(pc.green("\n🤖 AI-DevKit Buddy Initialization\n"));

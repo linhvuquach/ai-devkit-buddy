@@ -1,5 +1,4 @@
 ---
-type: command
 description: Refine a new user story, use Azure Devops MCP server to get the user story details
 prequesites:
   - Setup Azure Devops MCP server: https://github.com/microsoft/azure-devops-mcp/blob/main/docs/GETTINGSTARTED.md
@@ -16,6 +15,8 @@ You will receive the following parameters:
 - `ProjectName`: Azure DevOps Project Name
 - `WorkItemId`: Azure DevOps Work Item ID
 - `ExpectedOutputFolder`: Target directory for artifacts (default: `./docs`)
+
+Check whether the AI assistant has already connected to the Azure DevOps MCP server. If not, inform the user and stop the process.
 
 ## Task
 
