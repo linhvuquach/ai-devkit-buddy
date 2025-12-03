@@ -31,16 +31,16 @@
     "src/templates"
   ],
   "dependencies": {
+    "@inquirer/prompts": "^8.0.2",
     "cac": "^6.7.14",
     "fs-extra": "^11.2.0",
-    "picocolors": "^1.0.0",
-    "@inquirer/prompts": "^3.3.0"
+    "picocolors": "^1.0.0"
   },
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",
     "@types/node": "^20.11.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3",
-    "vitest": "^1.2.0"
+    "vitest": "^4.0.15"
   }
 }
