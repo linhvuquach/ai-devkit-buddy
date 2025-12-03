@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Check security-auditor template that check security of code.
 - Check performance prompt template that check performance of code.
 
-## [2.1.0] - 2025-11-24
+## [2.1.1] - 2025-12-03
 
 ### Added
 
@@ -26,7 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Revise the refine-new-us-azure-devops prompt template to check whether the AI assistant has already connected to the Azure DevOps MCP server.
+- Revise the `refine-new-us-azure-devops` prompt template to check whether the AI assistant has already connected to the Azure DevOps MCP server.
 
 ## [2.0.0] - 2025-11-24
 
