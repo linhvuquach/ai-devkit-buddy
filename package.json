@@ -22,7 +22,7 @@
   "author": "linhvuquach",
   "repository": {
     "type": "git",
-    "url": "https://github.com/linhvuquach/ai-devkit-buddy"
+    "url": "git+https://github.com/linhvuquach/ai-devkit-buddy.git"
   },
   "license": "ISC",
   "files": [

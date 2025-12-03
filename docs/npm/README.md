@@ -57,3 +57,9 @@ git push origin v2.0.0
 
 - https://docs.github.com/en/repositories/releasing-projects-on-github/automatically-generated-release-notes
 - https://arbitrary-but-fixed.net/devops/shell/2021/02/19/release-notes-from-changelog.html
+
+## Troubleshooting
+
+### Publish npm auto-corrected some errors in your package.json when publishing
+
+- Run "npm pkg fix" to address these errors.
