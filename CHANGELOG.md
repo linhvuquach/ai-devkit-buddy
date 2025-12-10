@@ -17,6 +17,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Check security-auditor template that check security of code.
 - Check performance prompt template that check performance of code.
 
+## [2.1.2] - 2025-12-03
+
+### Added
+
+- Add `init-specific-prompt` command that help to generate specific prompt template.
+- Add `ado-fix-issue` command that help to fix issue on Azure DevOps (using Azure Devops MCP server).
+
+### Changed
+
+- Rename slash command `ado-refine-new-us` to `ado-refine-new-us`.
+
+### Fixed
+
+- Fix npm vulnerabilities in dependencies.
+
 ## [2.1.1] - 2025-12-03
 
 ### Added
@@ -26,13 +41,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Revise the `refine-new-us-azure-devops` prompt template to check whether the AI assistant has already connected to the Azure DevOps MCP server.
+- Revise the `ado-refine-new-us` prompt template to check whether the AI assistant has already connected to the Azure DevOps MCP server.
 
 ## [2.0.0] - 2025-11-24
 
 ### Added
 
-- Add refine-new-us-azure-devops prompt template that help to refine new US on Azure DevOps (using Azure Devops MCP server)
+- Add ado-refine-new-us prompt template that help to refine new US on Azure DevOps (using Azure Devops MCP server)
 
 ### Changed
 

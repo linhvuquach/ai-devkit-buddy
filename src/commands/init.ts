@@ -14,6 +14,8 @@ const AVAILABLE_TYPES = [
   "onboarding",
   "capture-knowledge",
   "ado-refine-new-us",
+  "ado-fix-issue",
+  "init-specific-prompt",
 ];
 
 export async function init(options: InitOptions) {

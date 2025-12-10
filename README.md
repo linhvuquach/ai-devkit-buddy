@@ -70,8 +70,11 @@ Depending on your selection, the tool will generate markdown templates in the fo
 .cursor/
   └── commands/
       └── onboarding.md
-      └── ado-refine-new-us.md
       └── capture-knowledge.md
+      └── ado-refine-new-us.md
+      └── ado-fix-issue.md
+      └── init-specific-prompt.md
+      └── ...
 ```
 
 **Claude**
@@ -80,8 +83,11 @@ Depending on your selection, the tool will generate markdown templates in the fo
 .claude/
   └── commands/
       └── onboarding.md
-      └── ado-refine-new-us.md
       └── capture-knowledge.md
+      └── ado-refine-new-us.md
+      └── ado-fix-issue.md
+      └── init-specific-prompt.md
+      └── ...
 ```
 
 ## Supported Command Types
