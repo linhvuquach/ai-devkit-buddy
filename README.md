@@ -92,8 +92,14 @@ Depending on your selection, the tool will generate markdown templates in the fo
 
 ## Supported Command Types
 
-1.  **ado-refine-new-us**: Refine a new user story using Azure DevOps MCP server.
-2.  **capture-knowledge**: Capture knowledge of a code entry point and save it to the knowledge docs.
+| Command Type         | Description                                                                |
+| -------------------- | -------------------------------------------------------------------------- |
+| onboarding           | Generate onboarding document of project.                                   |
+| capture-knowledge    | Capture knowledge of a code entry point and save it to the knowledge docs. |
+| ado-refine-new-us    | Refine a new user story using Azure DevOps MCP server.                     |
+| ado-fix-issue        | Fix an issue using Azure DevOps MCP server.                                |
+| init-specific-prompt | Initialize a specific prompt template.                                     |
+| code-review          | Review entire codebase code.                                               |
 
 ## License
 

@@ -17,6 +17,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Check security-auditor template that check security of code.
 - Check performance prompt template that check performance of code.
 
+## [2.1.4] - 2025-12-10
+
+### Added
+
+- Add `code-review` command that help to review entire codebase code.
+
 ## [2.1.2] - 2025-12-03
 
 ### Added

@@ -16,6 +16,7 @@ const AVAILABLE_TYPES = [
   "ado-refine-new-us",
   "ado-fix-issue",
   "init-specific-prompt",
+  "code-review",
 ];
 
 export async function init(options: InitOptions) {
