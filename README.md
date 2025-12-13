@@ -100,6 +100,7 @@ Depending on your selection, the tool will generate markdown templates in the fo
 | ado-fix-issue        | Fix an issue using Azure DevOps MCP server.                                |
 | init-specific-prompt | Initialize a specific prompt template.                                     |
 | code-review          | Review entire codebase code.                                               |
+| csharp-expert        | Generate C# code with expert level.                                        |
 
 ## License
 

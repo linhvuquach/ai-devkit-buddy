@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Add `csharp-expert` command that help to generate C# code with expert level.
 - Add `code-review` command that help to review entire codebase code.
 
 ## [2.1.2] - 2025-12-03

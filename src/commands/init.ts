@@ -17,6 +17,7 @@ const AVAILABLE_TYPES = [
   "ado-fix-issue",
   "init-specific-prompt",
   "code-review",
+  "csharp-expert-agent",
 ];
 
 export async function init(options: InitOptions) {
