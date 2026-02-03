@@ -18,3 +18,4 @@ There are some resources that I used to build this project.
 ## Skills
 
 - [anthropics/skills: Public repository for Agent Skills. (2025)](https://github.com/anthropics/skills)
+- [Claude Agent Skills: A First Principles Deep Dive. (2025, October 26)](https://leehanchung.github.io/blogs/2025/10/26/claude-skills-deep-dive/)
