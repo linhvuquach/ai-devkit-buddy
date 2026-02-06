@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Refactor
+- Category prompt template, and then start `init` by picking category. (E.g. `-e cursor -t requirements,design` to generate requirements and design commands for cursor environment.)
+
 ### Fixed
 
 - Fix can't init multiple types. E.g. `-e cursor -t capture-knowledge, onboarding` should generate these types for cursor environment.
@@ -16,6 +19,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Review prompt template that review specific logic of code.
 - Check security-auditor template that check security of code.
 - Check performance prompt template that check performance of code.
+- Add generate `Skills` feature.
+
+## [2.1.5] - 2026-02-06
+
+### Added
+
+- Add `technical-approach-for-specific-requirement` command that help to generate technical approach for specific requirement.
+- Add `system-design-for-specific-requirement` command that help to generate system design for specific requirement.
 
 ## [2.1.4] - 2025-12-10
 

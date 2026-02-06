@@ -16,6 +16,8 @@ const AVAILABLE_TYPES = [
   "ado-refine-new-us",
   "ado-fix-issue",
   "init-specific-prompt",
+  "system-design",
+  "technical-approach",
   "code-review",
   "csharp-expert-agent",
 ];

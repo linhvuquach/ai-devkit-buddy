@@ -99,6 +99,8 @@ Depending on your selection, the tool will generate markdown templates in the fo
 | ado-refine-new-us    | Refine a new user story using Azure DevOps MCP server.                     |
 | ado-fix-issue        | Fix an issue using Azure DevOps MCP server.                                |
 | init-specific-prompt | Initialize a specific prompt template.                                     |
+| system-design        | Generate system design for specific requirement.                           |
+| technical-approach   | Generate technical approach for specific requirement.                      |
 | code-review          | Review entire codebase code.                                               |
 | csharp-expert        | Generate C# code with expert level.                                        |
 
