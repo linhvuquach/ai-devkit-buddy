@@ -16,10 +16,15 @@ const AVAILABLE_TYPES = [
   "ado-refine-new-us",
   "ado-fix-issue",
   "init-specific-prompt",
-  "system-design",
-  "technical-approach",
+  "compose-system-design",
+  "compose-technical-approach",
   "code-review",
   "csharp-expert-agent",
+  "elite-javascript",
+  "elite-csharp",
+  "senior-csharp-tech-lead-interviewer",
+  "senior-frontend-tech-lead-interviewer",
+  "senior-database-lead-interviewer",
 ];
 
 export async function init(options: InitOptions) {

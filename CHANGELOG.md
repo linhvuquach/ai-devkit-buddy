@@ -21,6 +21,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Check performance prompt template that check performance of code.
 - Add generate `Skills` feature.
 
+### [2.1.6] - 2026-03-16
+
+### Added
+
+- Add `elite-javascript` command that help to generate JavaScript code with expert level.
+- Add `elite-csharp` command that help to generate C# code with expert level.
+- Add `senior-csharp-tech-lead-interviewer` command that help to generate senior C# tech lead interviewer.
+- Add `senior-frontend-tech-lead-interviewer` command that help to generate senior frontend tech lead interviewer.
+- Add `senior-database-lead-interviewer` command that help to generate senior database lead interviewer.
+
+### Changed
+
+- Rename `system-design-for-specific-requirement` command to `compose-system-design`.
+- Rename `technical-approach-for-specific-requirement` command to `compose-technical-approach`.
+
 ## [2.1.5] - 2026-02-06
 
 ### Added

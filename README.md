@@ -92,17 +92,22 @@ Depending on your selection, the tool will generate markdown templates in the fo
 
 ## Supported Command Types
 
-| Command Type         | Description                                                                |
-| -------------------- | -------------------------------------------------------------------------- |
-| onboarding           | Generate onboarding document of project.                                   |
-| capture-knowledge    | Capture knowledge of a code entry point and save it to the knowledge docs. |
-| ado-refine-new-us    | Refine a new user story using Azure DevOps MCP server.                     |
-| ado-fix-issue        | Fix an issue using Azure DevOps MCP server.                                |
-| init-specific-prompt | Initialize a specific prompt template.                                     |
-| system-design        | Generate system design for specific requirement.                           |
-| technical-approach   | Generate technical approach for specific requirement.                      |
-| code-review          | Review entire codebase code.                                               |
-| csharp-expert        | Generate C# code with expert level.                                        |
+| Command Type                          | Description                                                                |
+| ------------------------------------- | -------------------------------------------------------------------------- |
+| onboarding                            | Generate onboarding document of project.                                   |
+| capture-knowledge                     | Capture knowledge of a code entry point and save it to the knowledge docs. |
+| ado-refine-new-us                     | Refine a new user story using Azure DevOps MCP server.                     |
+| ado-fix-issue                         | Fix an issue using Azure DevOps MCP server.                                |
+| init-specific-prompt                  | Initialize a specific prompt template.                                     |
+| system-design                         | Generate system design for specific requirement.                           |
+| technical-approach                    | Generate technical approach for specific requirement.                      |
+| code-review                           | Review entire codebase code.                                               |
+| csharp-expert                         | Generate C# code with expert level.                                        |
+| elite-javascript                      | Generate JavaScript code with expert level.                                |
+| elite-csharp                          | Generate C# code with expert level.                                        |
+| senior-csharp-tech-lead-interviewer   | Generate senior C# tech lead interviewer.                                  |
+| senior-frontend-tech-lead-interviewer | Generate senior frontend tech lead interviewer.                            |
+| senior-database-lead-interviewer      | Generate senior database lead interviewer.                                 |
 
 ## License
 
