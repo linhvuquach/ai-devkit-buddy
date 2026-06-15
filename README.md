@@ -108,6 +108,7 @@ Depending on your selection, the tool will generate markdown templates in the fo
 | senior-csharp-tech-lead-interviewer   | Generate senior C# tech lead interviewer.                                  |
 | senior-frontend-tech-lead-interviewer | Generate senior frontend tech lead interviewer.                            |
 | senior-database-lead-interviewer      | Generate senior database lead interviewer.                                 |
+| mastering-node.js                     | Master Node.js concepts using the 80/20 rule + Feynman technique.          |
 
 ## License
 

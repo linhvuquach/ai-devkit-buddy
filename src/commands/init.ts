@@ -25,6 +25,7 @@ const AVAILABLE_TYPES = [
   "senior-csharp-tech-lead-interviewer",
   "senior-frontend-tech-lead-interviewer",
   "senior-database-lead-interviewer",
+  "mastering-node.js",
 ];
 
 export async function init(options: InitOptions) {

@@ -21,6 +21,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Check performance prompt template that check performance of code.
 - Add generate `Skills` feature.
 
+### [2.1.7] - 2026-03-31
+
+### Added
+
+- Add `mastering-node.js` command that help to master Node.js concepts using the 80/20 rule + Feynman technique.
+
 ### [2.1.6] - 2026-03-16
 
 ### Added
