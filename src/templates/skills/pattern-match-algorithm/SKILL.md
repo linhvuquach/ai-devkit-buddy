@@ -1,5 +1,5 @@
 ---
-name: "Coding Patterns Recognition"
+name: "pattern match algorithm"
 description: "Map a coding problem → **1–2 likely patterns** in ≤30 seconds using deterministic signals."
 ---
 

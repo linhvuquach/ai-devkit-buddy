@@ -10,7 +10,7 @@
 ## Features
 
 - **Unified Templates**: Standardized prompts for every stage of development.
-- **Multi-Agent Support**: Generates commands for **Cursor** (`.cursor/commands/`) and **Claude Code** (`.claude/commands/`).
+- **Multi-Agent Support**: Generates commands and skills for **Cursor** (`.cursor/`) and **Claude Code** (`.claude/`).
 - **Flexible Setup**: Initialize specific phases or the entire suite.
 - **State Tracking**: Keeps track of your configuration in `.ai-devkit-buddy.json`.
 
@@ -36,7 +36,7 @@ Simply run the `init` command to start the interactive wizard:
 npx ai-devkit-buddy init
 ```
 
-Follow the prompts to select your target environment (Cursor/Claude) and the command types you want to configure.
+Follow the prompts to select your target environment (Cursor/Claude) and the commands and skills you want to install.
 
 ### CLI Flags
 
@@ -47,7 +47,7 @@ You can also skip the prompts by using flags:
 npx ai-devkit-buddy init -e cursor -a
 
 # Initialize specific types for both environments
-npx ai-devkit-buddy init -e both -t ado-refine-new-us
+npx ai-devkit-buddy init -e both -t compact,ts-code-kata
 ```
 
 #### Options
@@ -56,60 +56,43 @@ npx ai-devkit-buddy init -e both -t ado-refine-new-us
 | --------------- | ----- | ---------------------------------------------------------------------------- |
 | `--environment` | `-e`  | Target environment: `cursor`, `claude`, or `both`.                           |
 | `--all`         | `-a`  | Initialize all available types.                                              |
-| `--types`       | `-t`  | Comma-separated list of types (e.g., `onboarding, capture-knowledge, .etc`). |
+| `--types`       | `-t`  | Comma-separated list of types (e.g., `compact, ts-code-kata`). |
 | `--help`        | `-h`  | Display help message.                                                        |
 | `--version`     | `-v`  | Display version number.                                                      |
 
 ## Generated Structure
 
-Depending on your selection, the tool will generate markdown templates in the following locations:
-
-**Cursor**
+Commands are copied from `src/templates/commands/*.md` and skills from `src/templates/skills/<name>/` (each with a `SKILL.md`). New templates are picked up automatically; there is no list to maintain.
 
 ```
-.cursor/
-  └── commands/
-      └── onboarding.md
-      └── capture-knowledge.md
-      └── ado-refine-new-us.md
-      └── ado-fix-issue.md
-      └── init-specific-prompt.md
-      └── ...
+.cursor/  (or .claude/)
+  ├── commands/
+  │   └── compact.md
+  └── skills/
+      └── <skill-name>/SKILL.md (+ references/)
 ```
 
-**Claude**
+## Available Templates
 
-```
-.claude/
-  └── commands/
-      └── onboarding.md
-      └── capture-knowledge.md
-      └── ado-refine-new-us.md
-      └── ado-fix-issue.md
-      └── init-specific-prompt.md
-      └── ...
-```
+**Commands**
 
-## Supported Command Types
+| Name    | Description                                                               |
+| ------- | ------------------------------------------------------------------------- |
+| compact | Summarize the conversation so work can continue in a smaller context window. |
 
-| Command Type                          | Description                                                                |
-| ------------------------------------- | -------------------------------------------------------------------------- |
-| onboarding                            | Generate onboarding document of project.                                   |
-| capture-knowledge                     | Capture knowledge of a code entry point and save it to the knowledge docs. |
-| ado-refine-new-us                     | Refine a new user story using Azure DevOps MCP server.                     |
-| ado-fix-issue                         | Fix an issue using Azure DevOps MCP server.                                |
-| init-specific-prompt                  | Initialize a specific prompt template.                                     |
-| system-design                         | Generate system design for specific requirement.                           |
-| technical-approach                    | Generate technical approach for specific requirement.                      |
-| code-review                           | Review entire codebase code.                                               |
-| csharp-expert                         | Generate C# code with expert level.                                        |
-| elite-javascript                      | Generate JavaScript code with expert level.                                |
-| elite-csharp                          | Generate C# code with expert level.                                        |
-| senior-csharp-tech-lead-interviewer   | Generate senior C# tech lead interviewer.                                  |
-| senior-frontend-tech-lead-interviewer | Generate senior frontend tech lead interviewer.                            |
-| senior-database-lead-interviewer      | Generate senior database lead interviewer.                                 |
-| mastering-node.js                     | Master Node.js concepts using the 80/20 rule + Feynman technique.          |
+**Skills**
+
+| Name                     | Description                                                             |
+| ------------------------ | ----------------------------------------------------------------------- |
+| goal-review-coach        | Review, score and coach improvements to an individual work goal.        |
+| gamify-prototype         | Build gamified interactive HTML design prototypes.                      |
+| pattern-match-algorithm  | Map a coding problem to 1–2 likely algorithm patterns.                  |
+| repo-onboarding          | Scan a repo and write a full onboarding document.                       |
+| tech-interviewer         | Run a mock interview or generate questions (frontend, C#/.NET, database). |
+| technical-topic-explorer | Feynman-style explainer grounded in cited production case studies.      |
+| ts-code-kata             | Practice TypeScript code katas with strict TDD.                         |
 
 ## License
 
 ISC © [linhvuquach](https://github.com/linhvuquach)
+

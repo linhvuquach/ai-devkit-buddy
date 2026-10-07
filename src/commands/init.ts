@@ -10,23 +10,47 @@ interface InitOptions {
   types?: string;
 }
 
-const AVAILABLE_TYPES = [
-  "onboarding",
-  "capture-knowledge",
-  "ado-refine-new-us",
-  "ado-fix-issue",
-  "init-specific-prompt",
-  "compose-system-design",
-  "compose-technical-approach",
-  "code-review",
-  "csharp-expert-agent",
-  "elite-javascript",
-  "elite-csharp",
-  "senior-csharp-tech-lead-interviewer",
-  "senior-frontend-tech-lead-interviewer",
-  "senior-database-lead-interviewer",
-  "mastering-node.js",
-];
+type TemplateKind = "command" | "skill";
+
+interface Template {
+  name: string;
+  kind: TemplateKind;
+  source: string;
+}
+
+const TEMPLATE_DIRS: Record<TemplateKind, string> = {
+  command: "commands",
+  skill: "skills",
+};
+
+async function listTemplates(baseDir: string): Promise<Template[]> {
+  const templates: Template[] = [];
+
+  const commandsDir = path.join(baseDir, TEMPLATE_DIRS.command);
+  if (fs.existsSync(commandsDir)) {
+    for (const entry of await fs.readdir(commandsDir, { withFileTypes: true })) {
+      if (entry.isFile() && entry.name.endsWith(".md")) {
+        templates.push({
+          name: entry.name.slice(0, -3),
+          kind: "command",
+          source: path.join(commandsDir, entry.name),
+        });
+      }
+    }
+  }
+
+  const skillsDir = path.join(baseDir, TEMPLATE_DIRS.skill);
+  if (fs.existsSync(skillsDir)) {
+    for (const entry of await fs.readdir(skillsDir, { withFileTypes: true })) {
+      const source = path.join(skillsDir, entry.name);
+      if (entry.isDirectory() && fs.existsSync(path.join(source, "SKILL.md"))) {
+        templates.push({ name: entry.name, kind: "skill", source });
+      }
+    }
+  }
+
+  return templates;
+}
 
 export async function init(options: InitOptions) {
   console.log(pc.green("\n🤖 AI-DevKit Buddy Initialization\n"));
@@ -43,22 +67,28 @@ export async function init(options: InitOptions) {
     });
   }
 
+  const templateBaseDir = path.join(__dirname, "../../src/templates");
+  const templates = await listTemplates(templateBaseDir);
+
   let selectedTypes: string[] = [];
   if (options.all) {
-    selectedTypes = AVAILABLE_TYPES;
+    selectedTypes = templates.map((t) => t.name);
   } else if (options.types) {
     selectedTypes = options.types.split(",").map((p) => p.trim());
   } else {
     selectedTypes = await checkbox({
       message:
-        "Select types to initialize (Press <space> to select, <a> to toggle all, <enter> to confirm):",
-      choices: AVAILABLE_TYPES.map((p) => ({ name: p, value: p })),
+        "Select commands and skills to initialize (Press <space> to select, <a> to toggle all, <enter> to confirm):",
+      choices: templates.map((t) => ({
+        name: `${t.name} (${t.kind})`,
+        value: t.name,
+      })),
     });
 
     if (selectedTypes.length === 0) {
       console.log(
         pc.yellow(
-          "⚠️  No types selected. You must use <space> to select types."
+          "⚠️  Nothing selected. You must use <space> to select items."
         )
       );
       return;
@@ -69,44 +99,37 @@ export async function init(options: InitOptions) {
   console.log(pc.cyan(`Types: ${selectedTypes.join(", ")}\n`));
 
   const cwd = process.cwd();
-  const templateBaseDir = path.join(__dirname, "../../src/templates/commands");
+  const envDirs: string[] = [];
+  if (environment === "cursor" || environment === "both") envDirs.push("cursor");
+  if (environment === "claude" || environment === "both") envDirs.push("claude");
 
   for (const type of selectedTypes) {
-    const templateFile = `${type}.md`;
-    const sourcePath = path.join(templateBaseDir, templateFile);
+    const matches = templates.filter((t) => t.name === type);
 
-    if (!fs.existsSync(sourcePath)) {
+    if (matches.length === 0) {
       console.warn(pc.yellow(`Template not found for type: ${type}`));
       continue;
     }
 
-    const targets: { env: string; path: string }[] = [];
+    for (const template of matches) {
+      for (const env of envDirs) {
+        const targetPath =
+          template.kind === "command"
+            ? path.join(cwd, `.${env}/commands`, `${template.name}.md`)
+            : path.join(cwd, `.${env}/skills`, template.name);
 
-    if (environment === "cursor" || environment === "both") {
-      targets.push({
-        env: "cursor",
-        path: path.join(cwd, ".cursor/commands", templateFile),
-      });
-    }
-    if (environment === "claude" || environment === "both") {
-      targets.push({
-        env: "claude",
-        path: path.join(cwd, ".claude/commands", templateFile),
-      });
-    }
-
-    for (const target of targets) {
-      try {
-        await fs.ensureDir(path.dirname(target.path));
-        await fs.copy(sourcePath, target.path);
-        console.log(
-          pc.green(`✅ Generated ${type} template for ${target.env}`)
-        );
-      } catch (error) {
-        console.error(
-          pc.red(`Failed to generate ${type} for ${target.env}:`),
-          error
-        );
+        try {
+          await fs.ensureDir(path.dirname(targetPath));
+          await fs.copy(template.source, targetPath);
+          console.log(
+            pc.green(`✅ Generated ${template.name} ${template.kind} for ${env}`)
+          );
+        } catch (error) {
+          console.error(
+            pc.red(`Failed to generate ${template.name} for ${env}:`),
+            error
+          );
+        }
       }
     }
   }
