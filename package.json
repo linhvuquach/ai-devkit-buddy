@@ -1,7 +1,7 @@
 {
   "name": "ai-devkit-buddy",
   "version": "2.1.7",
-  "description": "An npm package to generate prompt templates for AI agents",
+  "description": "A package manager for AI agent skills (Claude Code, Cursor, Codex)",
   "main": "dist/index.js",
   "bin": {
     "ai-devkit-buddy": "bin/cli.js"
@@ -10,7 +10,12 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "dev": "ts-node src/index.ts",
-    "test": "vitest"
+    "test": "vitest",
+    "typecheck": "tsc --noEmit",
+    "validate-skills": "ts-node src/scripts/validate-skills.ts"
+  },
+  "engines": {
+    "node": ">=20"
   },
   "keywords": [
     "ai",
@@ -28,12 +33,14 @@
   "files": [
     "dist",
     "bin",
-    "src/templates"
+    "src/templates",
+    "skills/registry.json"
   ],
   "dependencies": {
     "@inquirer/prompts": "^8.0.2",
-    "cac": "^6.7.14",
+    "commander": "^14.0.3",
     "fs-extra": "^11.2.0",
+    "gray-matter": "^4.0.3",
     "picocolors": "^1.0.0"
   },
   "devDependencies": {

@@ -1,22 +1,37 @@
-import cac from "cac";
-import { version } from "../package.json";
+import { Command } from "commander";
+import { CLI_NAME, CONFIG_FILE, PACKAGE_VERSION } from "./constants";
 import { init } from "./commands/init";
+import { install } from "./commands/install";
+import { registerSkillCommands } from "./commands/skill/skill.command";
+import { withErrorHandler } from "./util/errors";
 
-const cli = cac("ai-devkit-buddy");
+export function createProgram(projectDir: string = process.cwd()): Command {
+  const program = new Command(CLI_NAME)
+    .description("Install and manage agent skills for Claude Code, Cursor and Codex")
+    .version(PACKAGE_VERSION, "-v, --version")
+    .showHelpAfterError();
 
-cli
-  .command("init", "Initialize ai-devkit-buddy in the current project")
-  .option(
-    "-e, --environment <env>",
-    "Set AI environment (cursor, claude, both)"
-  )
-  .option("-a, --all", "Initialize all available types")
-  .option("-t, --types <types>", "Comma-separated list of types to initialize")
-  .action((options) => {
-    init(options);
-  });
+  program
+    .command("init")
+    .description(`Pick environments, write ${CONFIG_FILE} and install built-in skills`)
+    .option("-e, --environment <envs>", "comma-separated environments: claude, cursor, codex (legacy: both)")
+    .option("--built-in", "install every built-in skill and command template without prompting")
+    .option("-a, --all", "alias for --built-in")
+    .option("-y, --yes", "never prompt (requires --environment)")
+    .option("--overwrite", "replace existing command templates")
+    .action(
+      withErrorHandler(async (flags: { environment?: string; builtIn?: boolean; all?: boolean; yes?: boolean; overwrite?: boolean }) => {
+        await init({ ...flags, builtIn: flags.builtIn || flags.all }, projectDir);
+      })
+    );
 
-cli.help();
-cli.version(version);
+  program
+    .command("install")
+    .description(`Reconcile the project with ${CONFIG_FILE}`)
+    .option("-c, --config <path>", "config file to install from", CONFIG_FILE)
+    .option("--overwrite", "replace existing symlinks for copy-mode skills")
+    .action(withErrorHandler((flags: { config: string; overwrite?: boolean }) => install(flags, projectDir)));
 
-export { cli };
+  registerSkillCommands(program, projectDir);
+  return program;
+}
