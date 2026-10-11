@@ -97,6 +97,21 @@ describe("cli end to end", () => {
     expect(await fs.pathExists(path.join(sandbox.home, "skills-cache", "anthropics"))).toBe(false);
   });
 
+  it("fills registries a fresh local index never scanned from the bundled index", async () => {
+    delete process.env.AI_DEVKIT_BUDDY_OFFICIAL_REGISTRIES;
+    const now = new Date().toISOString();
+    await fs.outputJson(path.join(sandbox.home, "skill-index.json"), {
+      meta: { version: 1, createdAt: now, updatedAt: now, registryHeads: {} },
+      skills: [
+        { name: "ts-code-kata", registry: "linhvuquach/ai-devkit-buddy", description: "kata", lastIndexed: now },
+      ],
+    });
+    await run(sandbox.project, "skill", "find", "pdf", "--limit", "1");
+
+    expect(output[0]).toContain("pdf");
+    expect(output[0]).toContain("anthropics/skills");
+  });
+
   it("migrates a legacy tracker config on init", async () => {
     await fs.writeJson(path.join(sandbox.project, ".ai-devkit-buddy.json"), {
       version: "0.0.1",

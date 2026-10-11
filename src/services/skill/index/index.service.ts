@@ -106,8 +106,21 @@ async function updateIndex(
   return { index, outcomes };
 }
 
-async function loadOrSeed(output: string): Promise<SkillIndexData> {
-  return (await readIndex(output)) ?? (await readIndex(BUNDLED_INDEX_FILE)) ?? emptyIndex(new Date().toISOString());
+/** Local entries win per registry; the bundled index fills registries this machine never scanned. */
+async function loadIndex(output: string): Promise<SkillIndexData> {
+  const local = await readIndex(output);
+  const bundled = await readIndex(BUNDLED_INDEX_FILE);
+  if (!local) return bundled ?? emptyIndex(new Date().toISOString());
+  if (!bundled) return local;
+  const known = new Set(local.skills.map((skill) => skill.registry));
+  const missing = bundled.skills.filter((skill) => !known.has(skill.registry));
+  if (!missing.length) return local;
+  const missingRegistries = new Set(missing.map((skill) => skill.registry));
+  const bundledHeads = Object.entries(bundled.meta.registryHeads).filter(([registry]) => missingRegistries.has(registry));
+  return {
+    meta: { ...local.meta, registryHeads: { ...Object.fromEntries(bundledHeads), ...local.meta.registryHeads } },
+    skills: [...local.skills, ...missing],
+  };
 }
 
 export async function ensureSkillIndex(
@@ -120,7 +133,7 @@ export async function ensureSkillIndex(
   const policy: ScanPolicy = fresh
     ? (_, source) => source.kind !== "git"
     : (registry, source) => refresh || source.kind !== "git" || hasCachedClone(registry);
-  const previous = existing ?? (await loadOrSeed(output));
+  const previous = await loadIndex(output);
   return (await updateIndex(projectDir, previous, policy, { output, rebuilt: !fresh })).index;
 }
 
@@ -142,7 +155,7 @@ export function rebuildIndex(projectDir: string, output: string = defaultIndexPa
 export async function reindexRegistries(projectDir: string, registryIds: readonly string[]): Promise<ScanOutcome[]> {
   const output = defaultIndexPath();
   const wanted = new Set(registryIds);
-  const previous = await loadOrSeed(output);
+  const previous = await loadIndex(output);
   const { outcomes } = await updateIndex(projectDir, previous, (registry) => wanted.has(registry), {
     output,
     rebuilt: false,
