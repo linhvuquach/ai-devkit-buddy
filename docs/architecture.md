@@ -124,7 +124,7 @@ A registry is code you did not write, so every path that reaches the filesystem 
 - **A new agent** needs one row in the agent table, one member in the `EnvironmentCode` union, and a test.
 - **A new registry** needs only an entry in `skills/registry.json` or a config file. No code changes.
 - **A new kind of source**, such as an npm tarball, needs a new `RegistrySource` member and one more case in `prepareRegistry`. The installer only needs a local folder, so it stays unchanged.
-- **Faster first search** needs a published `skills/index.json`. The index service already seeds from that file when no local index exists, but the repo does not ship one yet.
+- **Faster first search** comes from `skills/index.json`. The index service seeds from that file when no local index exists. The `Rebuild Skill Index` workflow (`.github/workflows/index.yml`) commits it when registry content changes. npm users get it only after `skills/index.json` is added to `files` in `package.json`.
 - **Larger indexes** can swap the linear search in `rankSkills` for an inverted index behind the same `findSkills` signature.
 
 ## Global state lives in one folder
