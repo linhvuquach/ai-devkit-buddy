@@ -20,6 +20,7 @@ import {
   renderGlobalSkills,
   renderInstallResults,
   renderProjectSkills,
+  renderRegistrySkills,
   renderRegistryStatus,
   renderSearchResults,
   renderUpdateSummary,
@@ -103,12 +104,17 @@ export function registerSkillCommands(program: Command, projectDir: string): voi
     );
 
   skill
-    .command("list")
-    .description("List installed project skills, or global skills with -g")
+    .command("list [registry]")
+    .description("List installed project skills, global skills with -g, or the skills a registry offers")
     .option("-g, --global", "list skills installed in the home directory")
     .addOption(envOption())
     .action(
-      withErrorHandler(async (flags: ScopeFlags) => {
+      withErrorHandler(async (registry: string | undefined, flags: ScopeFlags) => {
+        if (registry) {
+          if (flags.global || flags.env) throw new CliError("--global and --env do not apply when listing a registry.");
+          renderRegistrySkills(registry, await listInstallableSkills(projectDir, registry));
+          return;
+        }
         if (flags.env && !flags.global) throw new CliError("--env filters global skills only; add --global.");
         if (flags.global) renderGlobalSkills(await listGlobalSkills(envCodes(flags)));
         else renderProjectSkills(await listSkills(projectDir));

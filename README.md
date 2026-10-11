@@ -59,11 +59,12 @@ npx ai-devkit-buddy skill add anthropics/skills pdf # install one skill
 npx ai-devkit-buddy skill add anthropics/skills     # pick interactively
 npx ai-devkit-buddy skill add --built-in            # every built-in skill
 npx ai-devkit-buddy skill list                      # what this project has
+npx ai-devkit-buddy skill list anthropics/skills    # what a registry offers
 npx ai-devkit-buddy skill remove pdf
 npx ai-devkit-buddy skill update                    # pull cached registries
 ```
 
-`skill add`, `list` and `remove` take `-g, --global` with `-e, --env <env...>` to work in your home directory instead of the project. `skill add` also takes `--mode link|copy`. `skill find` takes `--refresh`, `--limit <n>` and `--all`.
+`skill add`, `list` and `remove` take `-g, --global` with `-e, --env <env...>` to work in your home directory instead of the project. `skill add` also takes `--mode link|copy`. `skill find` takes `--refresh`, `--limit <n>` and `--all`. The package ships a pre-built index of every official registry, so the first search works offline. `--refresh` clones the registries and rebuilds the index from their current content.
 
 ### Registries
 

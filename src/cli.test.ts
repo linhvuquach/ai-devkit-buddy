@@ -80,6 +80,23 @@ describe("cli end to end", () => {
     expect(await fs.pathExists(path.join(sandbox.project, ".ai-devkit-buddy.json"))).toBe(false);
   });
 
+  it("lists the skills a registry offers without a project config", async () => {
+    await run(sandbox.project, "skill", "list", "linhvuquach/ai-devkit-buddy");
+
+    expect(process.exitCode).toBe(undefined);
+    const builtins = (await fs.readdir(path.join(TEMPLATES_ROOT, "skills"))).sort();
+    expect(output.filter((line) => !line.startsWith(" ")).slice(0, -1)).toEqual(builtins);
+  });
+
+  it("finds third-party skills on a fresh home from the bundled index without cloning", async () => {
+    delete process.env.AI_DEVKIT_BUDDY_OFFICIAL_REGISTRIES;
+    await run(sandbox.project, "skill", "find", "pdf", "--limit", "1");
+
+    expect(output[0]).toContain("pdf");
+    expect(output[0]).toContain("anthropics/skills");
+    expect(await fs.pathExists(path.join(sandbox.home, "skills-cache", "anthropics"))).toBe(false);
+  });
+
   it("migrates a legacy tracker config on init", async () => {
     await fs.writeJson(path.join(sandbox.project, ".ai-devkit-buddy.json"), {
       version: "0.0.1",

@@ -4,7 +4,8 @@ import type { RegistryAddStatus, RegistryRemoveStatus } from "../../lib/config";
 import type { InstallReport } from "../../services/install/install.service";
 import type { GlobalSkill, ProjectSkillStatus } from "../../services/skill/installer/installer.service";
 import type { UpdateStatus, UpdateSummaryItem } from "../../services/skill/skill.service";
-import type { SkillEntry, SkillInstallAction, SkillInstallResult } from "../../types";
+import { CLI_NAME } from "../../constants";
+import type { DiscoveredSkill, SkillEntry, SkillInstallAction, SkillInstallResult } from "../../types";
 import { isInside } from "../../util/fs";
 import { ui } from "../../util/terminal-ui";
 
@@ -81,6 +82,18 @@ export function renderSearchResults(results: readonly SkillEntry[], keyword: str
     ui.info(`${pc.bold(skill.name)} ${pc.dim(skill.registry)}`);
     ui.info(`  ${skill.description}`);
   }
+}
+
+export function renderRegistrySkills(registry: string, skills: readonly DiscoveredSkill[]): void {
+  if (!skills.length) {
+    ui.info(`Registry ${registry} has no installable skills.`);
+    return;
+  }
+  for (const skill of skills) {
+    ui.info(pc.bold(skill.name));
+    ui.info(`  ${skill.description}`);
+  }
+  ui.info(pc.dim(`${skills.length} skill(s) in ${registry}. Install with: ${CLI_NAME} skill add ${registry} <skill-name>`));
 }
 
 export function renderUpdateSummary(items: readonly UpdateSummaryItem[]): void {
