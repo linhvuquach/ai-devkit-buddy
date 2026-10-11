@@ -44,7 +44,6 @@ export interface DiscoveredSkill {
 export interface SkillEntry {
   name: string;
   registry: string;
-  path: string;
   description: string;
   lastIndexed: string;
 }

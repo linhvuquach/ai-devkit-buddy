@@ -34,7 +34,8 @@
     "dist",
     "bin",
     "src/templates",
-    "skills/registry.json"
+    "skills/registry.json",
+    "skills/index.json"
   ],
   "dependencies": {
     "@inquirer/prompts": "^8.0.2",

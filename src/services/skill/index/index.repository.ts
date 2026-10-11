@@ -9,7 +9,7 @@ function isSkillEntry(value: unknown): value is SkillEntry {
   return (
     typeof entry === "object" &&
     entry !== null &&
-    ["name", "registry", "path", "description", "lastIndexed"].every(
+    ["name", "registry", "description", "lastIndexed"].every(
       (key) => typeof entry[key as keyof SkillEntry] === "string"
     )
   );

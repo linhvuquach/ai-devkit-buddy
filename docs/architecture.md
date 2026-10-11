@@ -70,7 +70,7 @@ Inside services, each module owns one body of knowledge:
 
 ### Searching for a skill
 
-`skill find` loads `~/.ai-devkit-buddy/skill-index.json` and ranks matches. An exact name match ranks first, then a name prefix, then a name substring, then a description substring. If the index is younger than 24 hours, only local and bundled registries are rescanned. If it is older, every registry that is already cached is pulled. A registry is rescanned only when its git `HEAD` changed. `--refresh` also clones registries that are not cached yet. A registry that fails to clone keeps its previous entries and produces a warning, so one broken repo never blocks search.
+`skill find` loads `~/.ai-devkit-buddy/skill-index.json` and ranks matches. On a fresh machine, that file does not exist yet, so the index starts from `skills/index.json`, which ships in the package and covers every official registry. An exact name match ranks first, then a name prefix, then a name substring, then a description substring. If the index is younger than 24 hours, only local and bundled registries are rescanned. If it is older, every registry that is already cached is pulled. A registry is rescanned only when its git `HEAD` changed. `--refresh` also clones registries that are not cached yet. A registry that fails to clone keeps its previous entries and produces a warning, so one broken repo never blocks search.
 
 ### Reproducing a project
 
@@ -124,7 +124,7 @@ A registry is code you did not write, so every path that reaches the filesystem 
 - **A new agent** needs one row in the agent table, one member in the `EnvironmentCode` union, and a test.
 - **A new registry** needs only an entry in `skills/registry.json` or a config file. No code changes.
 - **A new kind of source**, such as an npm tarball, needs a new `RegistrySource` member and one more case in `prepareRegistry`. The installer only needs a local folder, so it stays unchanged.
-- **Faster first search** comes from `skills/index.json`. The index service seeds from that file when no local index exists. The `Rebuild Skill Index` workflow (`.github/workflows/index.yml`) commits it when registry content changes. npm users get it only after `skills/index.json` is added to `files` in `package.json`.
+- **A fresher shipped index** is the next step. The `Rebuild Skill Index` workflow (`.github/workflows/index.yml`) commits `skills/index.json` when registry content changes, but npm users get the new file only with the next release. Fetching the committed file from GitHub on a fresh machine would close that gap.
 - **Larger indexes** can swap the linear search in `rankSkills` for an inverted index behind the same `findSkills` signature.
 
 ## Global state lives in one folder

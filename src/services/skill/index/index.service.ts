@@ -1,4 +1,3 @@
-import path from "path";
 import { BUNDLED_INDEX_FILE, defaultIndexPath, indexTtlMs } from "../../../constants";
 import type { RegistrySource, SkillEntry, SkillIndexData } from "../../../types";
 import { mapLimit } from "../../../util/concurrency";
@@ -77,7 +76,6 @@ async function updateIndex(
         skills.map((skill) => ({
           name: skill.name,
           registry,
-          path: path.join(root, "skills", skill.name),
           description: skill.description,
           lastIndexed: now,
         }))

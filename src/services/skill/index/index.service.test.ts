@@ -16,7 +16,6 @@ const entry = (name: string, registry: string, description = ""): SkillEntry => 
   name,
   registry,
   description,
-  path: "",
   lastIndexed: "",
 });
 
