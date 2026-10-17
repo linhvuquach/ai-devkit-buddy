@@ -70,7 +70,15 @@ Inside services, each module owns one body of knowledge:
 
 ### Searching for a skill
 
-`skill find` loads `~/.ai-devkit-buddy/skill-index.json` and ranks matches. On a fresh machine, that file does not exist yet, so the index starts from `skills/index.json`, which ships in the package and covers every official registry. An exact name match ranks first, then a name prefix, then a name substring, then a description substring. If the index is younger than 24 hours, only local and bundled registries are rescanned. If it is older, every registry that is already cached is pulled. A registry is rescanned only when its git `HEAD` changed. `--refresh` also clones registries that are not cached yet. A registry that fails to clone keeps its previous entries and produces a warning, so one broken repo never blocks search.
+`skill find` loads `~/.ai-devkit-buddy/skill-index.json` and ranks matches. An exact name match ranks first, then a name prefix, then a name substring, then a description substring. The command prints a table with the skill name, the registry, and a description cut at 60 characters, then the `skill add` command for each shown row. `--limit` only changes how many rows are shown. The count is the full number of matches. `--all` shows every row.
+
+On a fresh machine the local index does not exist yet, so search starts from `skills/index.json`, which ships in the package and covers every official registry. When a local index already exists, registries that machine has scanned keep their local rows, and registries it has never scanned are filled in from the bundled index. If the index is younger than 24 hours, only local and bundled registries are rescanned. If it is older, every registry that is already cached is pulled. A registry is rescanned only when its git `HEAD` changed. `--refresh` also clones registries that are not cached yet. A registry that fails to clone keeps its previous entries and produces a warning, so one broken repo never blocks search.
+
+### Listing installed skills
+
+`skill list` scans the skill folders of the agents in the project config. It prints one row per skill that is actually on disk. A skill recorded in the config but missing from disk does not appear. A skill on disk that is not in the config does appear. The registry cell comes from the config when the name is listed there. Otherwise it is read from the folder path. Both the bundled cache and a cache laid out as `<org>/<repo>/skills/<name>` yield `org/repo`. Anything else is `unknown`. The environments cell is the project's configured agents, the same list on every row.
+
+`skill list <registry>` is a different question. It prepares that registry and prints the skills it offers, so you can pick a name before `skill add`.
 
 ### Reproducing a project
 
