@@ -3,7 +3,7 @@ import path from "path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createProgram } from "./cli";
 import { COMMAND_TEMPLATES_DIR, TEMPLATES_ROOT } from "./constants";
-import { createSandbox, type Sandbox } from "./test-helpers";
+import { createSandbox, writeSkill, type Sandbox } from "./test-helpers";
 
 let sandbox: Sandbox;
 let output: string[];
@@ -23,6 +23,8 @@ afterEach(() => {
 });
 
 const run = (projectDir: string, ...args: string[]) => createProgram(projectDir).parseAsync(args, { from: "user" });
+
+const stripAnsi = (text: string) => text.replace(/\x1b\[[0-9;]*m/g, "");
 
 async function linksUnder(projectDir: string, skillDir: string): Promise<Record<string, string>> {
   const dir = path.join(projectDir, skillDir);
@@ -51,9 +53,13 @@ describe("cli end to end", () => {
 
     output = [];
     await run(sandbox.project, "skill", "list");
-    expect(output.length).toBe(builtins.length);
-    expect(output[0]).toContain("gamify-prototype");
-    expect(output[0]).toContain("claude:symlink cursor:symlink");
+    const listed = output.map(stripAnsi);
+    expect(listed).toHaveLength(builtins.length + 4);
+    expect(listed[0]).toBe("\nInstalled Skills:\n");
+    expect(listed[3]).toContain("gamify-prototype");
+    expect(listed[3]).toContain("linhvuquach/ai-devkit-buddy");
+    expect(listed[3]).toContain("claude, cursor");
+    expect(listed.at(-1)).toBe(`\nTotal: ${builtins.length} skills\n`);
 
     const clone = path.join(sandbox.root, "clone");
     await fs.outputJson(path.join(clone, ".ai-devkit-buddy.json"), config);
@@ -80,6 +86,73 @@ describe("cli end to end", () => {
     expect(await fs.pathExists(path.join(sandbox.project, ".ai-devkit-buddy.json"))).toBe(false);
   });
 
+  it("tells you how to install when the project has no skills", async () => {
+    await fs.writeJson(path.join(sandbox.project, ".ai-devkit-buddy.json"), {
+      environments: ["claude"],
+      skills: [],
+    });
+    await run(sandbox.project, "skill", "list");
+    expect(output.map(stripAnsi)).toEqual([
+      "No skills installed in this project.",
+      "Install a skill with: ai-devkit-buddy skill add <registry> <name>",
+    ]);
+  });
+
+  it("says when no global skills are installed", async () => {
+    await run(sandbox.project, "skill", "list", "-g");
+    expect(output.map(stripAnsi)).toEqual([
+      "No global skills installed.",
+      "Install a global skill with: ai-devkit-buddy skill add <registry> <name> --global",
+    ]);
+  });
+
+  it("lists a skill folder that is not in the config", async () => {
+    await fs.writeJson(path.join(sandbox.project, ".ai-devkit-buddy.json"), {
+      environments: ["claude"],
+      skills: [{ registry: "me/reg", name: "ghost" }],
+    });
+    const skillsDir = path.join(sandbox.project, ".claude/skills");
+    const cacheSkill = path.join(sandbox.home, "skills-cache", "acme", "widgets", "skills", "cached");
+    await fs.ensureDir(cacheSkill);
+    await fs.ensureDir(skillsDir);
+    await fs.symlink(cacheSkill, path.join(skillsDir, "cached"));
+    await fs.ensureDir(path.join(sandbox.root, "loose-skill"));
+    await fs.symlink(path.join(sandbox.root, "loose-skill"), path.join(skillsDir, "loose"));
+
+    await run(sandbox.project, "skill", "list");
+
+    expect(output.map(stripAnsi)).toEqual([
+      "\nInstalled Skills:\n",
+      "  Skill Name  Registry      Environments  ",
+      "  ────────────────────────────────────────",
+      "  cached      acme/widgets  claude        ",
+      "  loose       unknown       claude        ",
+      "\nTotal: 2 skills\n",
+    ]);
+  });
+
+  it("groups one global skill installed in several environments onto one row", async () => {
+    const registry = path.join(sandbox.root, "reg");
+    await writeSkill(registry, "alpha");
+    await fs.writeJson(path.join(sandbox.project, ".ai-devkit-buddy.json"), {
+      environments: ["claude"],
+      skills: [],
+      registries: { "me/reg": registry },
+    });
+    await run(sandbox.project, "skill", "add", "me/reg", "alpha", "-g", "-e", "claude,codex");
+    output = [];
+    await run(sandbox.project, "skill", "list", "-g", "-e", "claude,codex");
+
+    const visible = output.map(stripAnsi);
+    const row = visible.find((line) => line.includes("alpha"));
+    expect(visible[0]).toBe("\nGlobally Installed Skills:\n");
+    expect(visible.filter((line) => line.includes("alpha"))).toEqual([row]);
+    expect(row).toContain("claude, codex");
+    expect(row).toContain(path.join(sandbox.userHome, ".claude/skills/alpha"));
+    expect(row).toContain(path.join(sandbox.userHome, ".codex/skills/alpha"));
+    expect(visible.at(-1)).toBe("\nTotal: 1 skill installation\n");
+  });
+
   it("lists the skills a registry offers without a project config", async () => {
     await run(sandbox.project, "skill", "list", "linhvuquach/ai-devkit-buddy");
 
@@ -92,9 +165,33 @@ describe("cli end to end", () => {
     delete process.env.AI_DEVKIT_BUDDY_OFFICIAL_REGISTRIES;
     await run(sandbox.project, "skill", "find", "pdf", "--limit", "1");
 
-    expect(output[0]).toContain("pdf");
-    expect(output[0]).toContain("anthropics/skills");
+    const text = output.map(stripAnsi).join("\n");
+    expect(text).toContain("pdf");
+    expect(text).toContain("anthropics/skills");
     expect(await fs.pathExists(path.join(sandbox.home, "skills-cache", "anthropics"))).toBe(false);
+  });
+
+  it("says when a search matches nothing", async () => {
+    await run(sandbox.project, "skill", "find", "zzz-no-such-skill-xyz");
+    expect(output.map(stripAnsi)).toEqual([
+      'No skills found matching "zzz-no-such-skill-xyz"',
+      "Try a different keyword or use --refresh to update the skill index",
+    ]);
+  });
+
+  it("prints the find table, a truncated description, and how many matches --limit hides", async () => {
+    delete process.env.AI_DEVKIT_BUDDY_OFFICIAL_REGISTRIES;
+    await run(sandbox.project, "skill", "find", "pdf", "--limit", "1");
+
+    expect(output.map(stripAnsi)).toEqual([
+      '\nFound 34 skills matching "pdf" (showing top 1):\n',
+      "  Skill Name  Registry           Description                                                   ",
+      "  ─────────────────────────────────────────────────────────────────────────────────────────────",
+      "  pdf         anthropics/skills  Use this skill whenever the user wants to do anything wit...  ",
+      "\nInstall with:",
+      "  ai-devkit-buddy skill add anthropics/skills pdf",
+      "\n33 more. Narrow the keyword, or use --limit <n> or --all to see them.",
+    ]);
   });
 
   it("fills registries a fresh local index never scanned from the bundled index", async () => {
@@ -108,8 +205,9 @@ describe("cli end to end", () => {
     });
     await run(sandbox.project, "skill", "find", "pdf", "--limit", "1");
 
-    expect(output[0]).toContain("pdf");
-    expect(output[0]).toContain("anthropics/skills");
+    const text = output.map(stripAnsi).join("\n");
+    expect(text).toContain("pdf");
+    expect(text).toContain("anthropics/skills");
   });
 
   it("migrates a legacy tracker config on init", async () => {

@@ -2,7 +2,7 @@ import fs from "fs-extra";
 import path from "path";
 import { beforeEach, describe, expect, it } from "vitest";
 import { createSandbox, writeSkill, type Sandbox } from "../../../test-helpers";
-import { addSkills, listGlobalSkills, listSkills, removeSkill } from "./installer.service";
+import { addSkills, listGlobalSkills, listInstalledSkills, listSkills, removeSkill } from "./installer.service";
 
 let sandbox: Sandbox;
 let registry: string;
@@ -108,6 +108,50 @@ describe("addSkills", () => {
       { environment: "codex", name: "alpha", path: path.join(sandbox.userHome, ".codex/skills/alpha") },
     ]);
     expect((await readConfig()).skills).toEqual([]);
+  });
+});
+
+describe("listInstalledSkills", () => {
+  it("throws the init hint when the project has no config", async () => {
+    await fs.remove(path.join(sandbox.project, ".ai-devkit-buddy.json"));
+    await expect(listInstalledSkills(sandbox.project)).rejects.toThrow(
+      "No project config found. Run: ai-devkit-buddy init"
+    );
+  });
+
+  it("lists skills on disk, including ones the config does not name", async () => {
+    const claude = path.join(sandbox.project, ".claude/skills");
+    const codex = path.join(sandbox.project, ".agents/skills");
+    await fs.ensureDir(claude);
+    await fs.ensureDir(codex);
+
+    const cacheSkill = path.join(sandbox.home, "skills-cache", "acme", "widgets", "skills", "cached");
+    await fs.ensureDir(cacheSkill);
+    await fs.symlink(cacheSkill, path.join(claude, "cached"));
+    await fs.ensureDir(path.join(codex, "cached"));
+
+    const foreign = path.join(sandbox.root, "other-cache", "skills", "codeaholicguy", "ai-devkit", "skills", "memory");
+    await fs.ensureDir(foreign);
+    await fs.symlink(foreign, path.join(claude, "memory"));
+
+    await fs.ensureDir(path.join(sandbox.root, "loose-skill"));
+    await fs.symlink(path.join(sandbox.root, "loose-skill"), path.join(claude, "loose"));
+    await fs.ensureDir(path.join(claude, "Notes"));
+    await fs.symlink(path.join(registry, "skills", "alpha"), path.join(claude, "alpha"));
+
+    const config = await readConfig();
+    config.skills = [
+      { registry: "me/reg", name: "alpha" },
+      { registry: "me/reg", name: "ghost" },
+    ];
+    await fs.writeJson(path.join(sandbox.project, ".ai-devkit-buddy.json"), config);
+
+    expect(await listInstalledSkills(sandbox.project)).toEqual([
+      { name: "alpha", registry: "me/reg", environments: ["claude", "codex"] },
+      { name: "cached", registry: "acme/widgets", environments: ["claude", "codex"] },
+      { name: "loose", registry: "unknown", environments: ["claude", "codex"] },
+      { name: "memory", registry: "codeaholicguy/ai-devkit", environments: ["claude", "codex"] },
+    ]);
   });
 });
 

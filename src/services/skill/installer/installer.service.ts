@@ -22,7 +22,7 @@ import { isInside, lstatOrNull } from "../../../util/fs";
 import { discoverRegistrySkills, resolveContainedSkill } from "../registry/registry-discovery";
 import { prepareRegistry } from "../registry/registry-source";
 import { fetchMergedRegistry } from "../registry/registry.service";
-import { validateRegistryId, validateSkillName } from "../skill-validation";
+import { isValidSkillName, validateRegistryId, validateSkillName } from "../skill-validation";
 
 export interface InstallScope {
   projectDir: string;
@@ -156,6 +156,57 @@ async function installedState(target: string): Promise<InstalledState> {
   const stat = await lstatOrNull(target);
   if (!stat) return "missing";
   return stat.isSymbolicLink() ? "symlink" : "directory";
+}
+
+export interface InstalledSkill {
+  name: string;
+  registry: string;
+  environments: EnvironmentCode[];
+}
+
+async function registryFromDisk(folder: string): Promise<string> {
+  try {
+    const parts = (await fs.realpath(folder)).split(path.sep);
+    const skillDir = parts.lastIndexOf("skills");
+    if (skillDir < 2) return "unknown";
+    const id = `${parts[skillDir - 2]}/${parts[skillDir - 1]}`;
+    validateRegistryId(id);
+    return id;
+  } catch {
+    return "unknown";
+  }
+}
+
+export async function listInstalledSkills(projectDir: string): Promise<InstalledSkill[]> {
+  const config = await readProjectConfig(projectDir);
+  if (!config) throw new ConfigNotFoundError(`No project config found. Run: ${CLI_NAME} init`);
+
+  const registryByName = new Map<string, string>();
+  for (const skill of config.skills) {
+    if (!registryByName.has(skill.name)) registryByName.set(skill.name, skill.registry);
+  }
+
+  const folderByName = new Map<string, string>();
+  for (const environment of config.environments) {
+    const dir = getSkillPath(environment, projectDir);
+    const entries = await fs.readdir(dir, { withFileTypes: true }).catch(() => []);
+    for (const entry of entries) {
+      if ((!entry.isDirectory() && !entry.isSymbolicLink()) || !isValidSkillName(entry.name)) continue;
+      if (!folderByName.has(entry.name)) folderByName.set(entry.name, path.join(dir, entry.name));
+    }
+  }
+
+  const environments = [...config.environments];
+  const rows: InstalledSkill[] = [];
+  for (const [name, folder] of folderByName) {
+    rows.push({
+      name,
+      registry: registryByName.get(name) ?? (await registryFromDisk(folder)),
+      environments: [...environments],
+    });
+  }
+  rows.sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
+  return rows;
 }
 
 export async function listSkills(projectDir: string): Promise<ProjectSkillStatus[]> {

@@ -2,12 +2,13 @@ import path from "path";
 import pc from "picocolors";
 import type { RegistryAddStatus, RegistryRemoveStatus } from "../../lib/config";
 import type { InstallReport } from "../../services/install/install.service";
-import type { GlobalSkill, ProjectSkillStatus } from "../../services/skill/installer/installer.service";
+import type { GlobalSkill, InstalledSkill } from "../../services/skill/installer/installer.service";
 import type { UpdateStatus, UpdateSummaryItem } from "../../services/skill/skill.service";
 import { CLI_NAME } from "../../constants";
 import type { DiscoveredSkill, SkillEntry, SkillInstallAction, SkillInstallResult } from "../../types";
 import { isInside } from "../../util/fs";
 import { ui } from "../../util/terminal-ui";
+import { truncate } from "../../util/text";
 
 const ACTION_STYLE: Record<SkillInstallAction, (text: string) => string> = {
   symlinked: pc.green,
@@ -22,6 +23,30 @@ const UPDATE_STYLE: Record<UpdateStatus, (text: string) => string> = {
   skipped: pc.dim,
   failed: pc.red,
 };
+
+function formatCount(count: number, singular: string, plural = `${singular}s`): string {
+  return `${count} ${count === 1 ? singular : plural}`;
+}
+
+function groupGlobalSkills(skills: readonly GlobalSkill[]): { name: string; environments: string; path: string }[] {
+  const byName = new Map<string, { environments: string[]; paths: string[] }>();
+  for (const skill of skills) {
+    const existing = byName.get(skill.name);
+    if (!existing) {
+      byName.set(skill.name, { environments: [skill.environment], paths: [skill.path] });
+      continue;
+    }
+    if (!existing.environments.includes(skill.environment)) existing.environments.push(skill.environment);
+    if (!existing.paths.includes(skill.path)) existing.paths.push(skill.path);
+  }
+  return [...byName.entries()]
+    .sort(([left], [right]) => (left < right ? -1 : left > right ? 1 : 0))
+    .map(([name, row]) => ({
+      name,
+      environments: row.environments.join(", "),
+      path: row.paths.join(", "),
+    }));
+}
 
 function displayPath(target: string): string {
   const cwd = process.cwd();
@@ -52,35 +77,62 @@ export function renderCommandCopies(copies: readonly { name: string; target: str
   }
 }
 
-export function renderProjectSkills(skills: readonly ProjectSkillStatus[]): void {
+export function renderProjectSkills(skills: readonly InstalledSkill[]): void {
   if (!skills.length) {
-    ui.info("No skills installed in this project.");
+    ui.warn("No skills installed in this project.");
+    ui.info(`Install a skill with: ${CLI_NAME} skill add <registry> <name>`);
     return;
   }
-  for (const skill of skills) {
-    const targets = skill.targets
-      .map(({ environment, state }) => `${environment}:${state === "missing" ? pc.red(state) : state}`)
-      .join(" ");
-    ui.info(`${pc.bold(skill.name)} ${pc.dim(`(${skill.registry}, ${skill.mode})`)} ${targets}`);
-  }
+
+  ui.text("Installed Skills:", { breakline: true });
+  ui.table({
+    headers: ["Skill Name", "Registry", "Environments"],
+    rows: skills.map((skill) => [skill.name, skill.registry, skill.environments.join(", ")]),
+    columnStyles: [pc.cyan, pc.dim, pc.green],
+  });
+  ui.text(`Total: ${formatCount(skills.length, "skill")}`, { breakline: true });
 }
 
 export function renderGlobalSkills(skills: readonly GlobalSkill[]): void {
   if (!skills.length) {
     ui.info("No global skills installed.");
+    ui.info(`Install a global skill with: ${CLI_NAME} skill add <registry> <name> --global`);
     return;
   }
-  for (const skill of skills) ui.info(`${pc.bold(skill.name)} ${pc.dim(`[${skill.environment}]`)} ${skill.path}`);
+
+  const grouped = groupGlobalSkills(skills);
+  ui.text("Globally Installed Skills:", { breakline: true });
+  ui.table({
+    headers: ["Skill Name", "Environments", "Path"],
+    rows: grouped.map((skill) => [skill.name, skill.environments, skill.path]),
+    columnStyles: [pc.cyan, pc.green, pc.dim],
+  });
+  ui.text(`Total: ${formatCount(grouped.length, "skill installation")}`, { breakline: true });
 }
 
-export function renderSearchResults(results: readonly SkillEntry[], keyword: string): void {
+export function renderSearchResults(results: readonly SkillEntry[], keyword: string, limit?: number): void {
   if (!results.length) {
-    ui.info(`No skills match "${keyword}".`);
+    ui.warn(`No skills found matching "${keyword}"`);
+    ui.info("Try a different keyword or use --refresh to update the skill index");
     return;
   }
-  for (const skill of results) {
-    ui.info(`${pc.bold(skill.name)} ${pc.dim(skill.registry)}`);
-    ui.info(`  ${skill.description}`);
+
+  const shown = limit === undefined ? results : results.slice(0, limit);
+  const hidden = results.length - shown.length;
+  const showing = hidden > 0 ? ` (showing top ${shown.length})` : "";
+
+  ui.text(`Found ${formatCount(results.length, "skill")} matching "${keyword}"${showing}:`, { breakline: true });
+  ui.table({
+    headers: ["Skill Name", "Registry", "Description"],
+    rows: shown.map((skill) => [skill.name, skill.registry, truncate(skill.description, 60, "...")]),
+    columnStyles: [pc.cyan, pc.dim, pc.white],
+  });
+  ui.text("\nInstall with:");
+  for (const skill of shown) {
+    ui.text(`  ${CLI_NAME} skill add ${skill.registry} ${skill.name}`);
+  }
+  if (hidden > 0) {
+    ui.text(`\n${hidden} more. Narrow the keyword, or use --limit <n> or --all to see them.`);
   }
 }
 

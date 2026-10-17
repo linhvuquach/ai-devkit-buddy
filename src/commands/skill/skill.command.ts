@@ -7,7 +7,7 @@ import {
   addSkills,
   listGlobalSkills,
   listInstallableSkills,
-  listSkills,
+  listInstalledSkills,
   removeSkill,
 } from "../../services/skill/installer/installer.service";
 import { getBuiltinSkills } from "../../services/skill/skill-builtins";
@@ -117,7 +117,7 @@ export function registerSkillCommands(program: Command, projectDir: string): voi
         }
         if (flags.env && !flags.global) throw new CliError("--env filters global skills only; add --global.");
         if (flags.global) renderGlobalSkills(await listGlobalSkills(envCodes(flags)));
-        else renderProjectSkills(await listSkills(projectDir));
+        else renderProjectSkills(await listInstalledSkills(projectDir));
       })
     );
 
@@ -142,11 +142,8 @@ export function registerSkillCommands(program: Command, projectDir: string): voi
     .option("--all", "show every match")
     .action(
       withErrorHandler(async (keyword: string, flags: { refresh?: boolean; limit: number; all?: boolean }) => {
-        const results = await findSkills(projectDir, keyword, {
-          refresh: flags.refresh,
-          limit: flags.all ? undefined : flags.limit,
-        });
-        renderSearchResults(results, keyword);
+        const results = await findSkills(projectDir, keyword, { refresh: flags.refresh });
+        renderSearchResults(results, keyword, flags.all ? undefined : flags.limit);
       })
     );
 
