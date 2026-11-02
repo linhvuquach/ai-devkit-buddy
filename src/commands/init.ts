@@ -1,141 +1,110 @@
-import { select, checkbox } from "@inquirer/prompts";
-import pc from "picocolors";
+import { checkbox } from "@inquirer/prompts";
 import fs from "fs-extra";
 import path from "path";
-import { updateTrackerConfig } from "../utils/tracker";
+import { BUILTIN_SKILL_REGISTRY, CLI_NAME, COMMAND_TEMPLATES_DIR } from "../constants";
+import { addEnvironments, emptyProjectConfig, readProjectConfig, writeProjectConfig } from "../lib/config";
+import { addSkills } from "../services/skill/installer/installer.service";
+import { getBuiltinSkills } from "../services/skill/skill-builtins";
+import type { EnvironmentCode } from "../types";
+import { getAllEnvironments, getEnvironment, parseEnvironmentCodes } from "../util/env";
+import { CliError } from "../util/errors";
+import { isInteractive, ui } from "../util/terminal-ui";
+import { renderCommandCopies, renderInstallResults } from "./skill/skill.render";
 
-interface InitOptions {
+export interface InitOptions {
   environment?: string;
-  all?: boolean;
-  types?: string;
+  builtIn?: boolean;
+  yes?: boolean;
+  overwrite?: boolean;
 }
 
-type TemplateKind = "command" | "skill";
-
-interface Template {
-  name: string;
-  kind: TemplateKind;
-  source: string;
+interface Selection {
+  skills: string[];
+  commands: string[];
 }
 
-const TEMPLATE_DIRS: Record<TemplateKind, string> = {
-  command: "commands",
-  skill: "skills",
-};
-
-async function listTemplates(baseDir: string): Promise<Template[]> {
-  const templates: Template[] = [];
-
-  const commandsDir = path.join(baseDir, TEMPLATE_DIRS.command);
-  if (fs.existsSync(commandsDir)) {
-    for (const entry of await fs.readdir(commandsDir, { withFileTypes: true })) {
-      if (entry.isFile() && entry.name.endsWith(".md")) {
-        templates.push({
-          name: entry.name.slice(0, -3),
-          kind: "command",
-          source: path.join(commandsDir, entry.name),
-        });
-      }
-    }
-  }
-
-  const skillsDir = path.join(baseDir, TEMPLATE_DIRS.skill);
-  if (fs.existsSync(skillsDir)) {
-    for (const entry of await fs.readdir(skillsDir, { withFileTypes: true })) {
-      const source = path.join(skillsDir, entry.name);
-      if (entry.isDirectory() && fs.existsSync(path.join(source, "SKILL.md"))) {
-        templates.push({ name: entry.name, kind: "skill", source });
-      }
-    }
-  }
-
-  return templates;
+async function listCommandTemplates(): Promise<string[]> {
+  const entries = await fs.readdir(COMMAND_TEMPLATES_DIR).catch(() => []);
+  return entries.filter((file) => file.endsWith(".md")).map((file) => file.slice(0, -3)).sort();
 }
 
-export async function init(options: InitOptions) {
-  console.log(pc.green("\n🤖 AI-DevKit Buddy Initialization\n"));
+function rerunCommand(options: InitOptions): string {
+  return `${CLI_NAME} init -e claude,cursor,codex --yes${options.builtIn ? " --built-in" : ""}`;
+}
 
-  let environment = options.environment;
-  if (!environment) {
-    environment = await select({
-      message: "Select an AI agent to configure:",
-      choices: [
-        { name: "Cursor", value: "cursor" },
-        { name: "Claude Code", value: "claude" },
-        { name: "Both", value: "both" },
-      ],
-    });
-  }
-
-  const templateBaseDir = path.join(__dirname, "../../src/templates");
-  const templates = await listTemplates(templateBaseDir);
-
-  let selectedTypes: string[] = [];
-  if (options.all) {
-    selectedTypes = templates.map((t) => t.name);
-  } else if (options.types) {
-    selectedTypes = options.types.split(",").map((p) => p.trim());
-  } else {
-    selectedTypes = await checkbox({
-      message:
-        "Select commands and skills to initialize (Press <space> to select, <a> to toggle all, <enter> to confirm):",
-      choices: templates.map((t) => ({
-        name: `${t.name} (${t.kind})`,
-        value: t.name,
-      })),
-    });
-
-    if (selectedTypes.length === 0) {
-      console.log(
-        pc.yellow(
-          "⚠️  Nothing selected. You must use <space> to select items."
-        )
-      );
-      return;
-    }
-  }
-
-  console.log(pc.cyan(`\nEnvironment: ${environment}`));
-  console.log(pc.cyan(`Types: ${selectedTypes.join(", ")}\n`));
-
-  const cwd = process.cwd();
-  const envDirs: string[] = [];
-  if (environment === "cursor" || environment === "both") envDirs.push("cursor");
-  if (environment === "claude" || environment === "both") envDirs.push("claude");
-
-  for (const type of selectedTypes) {
-    const matches = templates.filter((t) => t.name === type);
-
-    if (matches.length === 0) {
-      console.warn(pc.yellow(`Template not found for type: ${type}`));
-      continue;
-    }
-
-    for (const template of matches) {
-      for (const env of envDirs) {
-        const targetPath =
-          template.kind === "command"
-            ? path.join(cwd, `.${env}/commands`, `${template.name}.md`)
-            : path.join(cwd, `.${env}/skills`, template.name);
-
-        try {
-          await fs.ensureDir(path.dirname(targetPath));
-          await fs.copy(template.source, targetPath);
-          console.log(
-            pc.green(`✅ Generated ${template.name} ${template.kind} for ${env}`)
-          );
-        } catch (error) {
-          console.error(
-            pc.red(`Failed to generate ${template.name} for ${env}:`),
-            error
-          );
-        }
-      }
-    }
-  }
-
-  await updateTrackerConfig({
-    environment: environment as "cursor" | "claude" | "both",
-    initializedTypes: selectedTypes,
+async function chooseEnvironments(options: InitOptions, current: EnvironmentCode[]): Promise<EnvironmentCode[]> {
+  if (options.environment) return parseEnvironmentCodes(options.environment);
+  if (options.yes) throw new CliError(`--yes needs --environment. Run: ${rerunCommand(options)}`);
+  if (!isInteractive()) throw new CliError(`No TTY to prompt for environments. Run: ${rerunCommand(options)}`);
+  const codes = await checkbox<EnvironmentCode>({
+    message: "Select AI agents to configure:",
+    choices: getAllEnvironments().map((env) => ({ name: env.name, value: env.code, checked: current.includes(env.code) })),
+    required: true,
   });
+  return codes;
+}
+
+async function chooseContent(options: InitOptions, environments: EnvironmentCode[]): Promise<Selection> {
+  const skills = (await getBuiltinSkills()).map((skill) => skill.name);
+  const commands = await listCommandTemplates();
+  if (options.builtIn) return { skills, commands };
+  if (options.yes) return { skills: [], commands: [] };
+  if (!isInteractive()) {
+    const envs = environments.join(",");
+    throw new CliError(
+      `No TTY to pick skills. Run: ${CLI_NAME} init -e ${envs} --built-in (everything) or ${CLI_NAME} init -e ${envs} --yes (config only)`
+    );
+  }
+  const picked = await checkbox({
+    message: "Select built-in skills and commands (<space> to select, <a> to toggle all):",
+    choices: [
+      ...skills.map((name) => ({ name: `${name} (skill)`, value: `skill:${name}` })),
+      ...commands.map((name) => ({ name: `${name} (command)`, value: `command:${name}` })),
+    ],
+  });
+  const of = (kind: string) => picked.filter((v) => v.startsWith(`${kind}:`)).map((v) => v.slice(kind.length + 1));
+  return { skills: of("skill"), commands: of("command") };
+}
+
+async function copyCommandTemplates(
+  projectDir: string,
+  environments: EnvironmentCode[],
+  names: string[],
+  overwrite: boolean
+): Promise<{ name: string; target: string; copied: boolean }[]> {
+  const copies = [];
+  for (const code of environments) {
+    const commandPath = getEnvironment(code).commandPath;
+    if (!commandPath) continue;
+    for (const name of names) {
+      const target = path.join(projectDir, commandPath, `${name}.md`);
+      const copied = overwrite || !(await fs.pathExists(target));
+      if (copied) await fs.copy(path.join(COMMAND_TEMPLATES_DIR, `${name}.md`), target);
+      copies.push({ name, target, copied });
+    }
+  }
+  return copies;
+}
+
+export async function init(options: InitOptions, projectDir: string): Promise<void> {
+  const existing = (await readProjectConfig(projectDir)) ?? emptyProjectConfig();
+  const environments = await chooseEnvironments(options, existing.environments);
+  const selection = await chooseContent(options, environments);
+
+  await writeProjectConfig(projectDir, addEnvironments(existing, environments));
+  ui.success(`Configured environments: ${environments.join(", ")}`);
+
+  if (selection.skills.length) {
+    const results = await addSkills(BUILTIN_SKILL_REGISTRY, selection.skills, {
+      projectDir,
+      environments,
+      overwrite: options.overwrite,
+    });
+    renderInstallResults(results);
+  }
+  if (selection.commands.length) {
+    renderCommandCopies(
+      await copyCommandTemplates(projectDir, environments, selection.commands, options.overwrite ?? false)
+    );
+  }
 }

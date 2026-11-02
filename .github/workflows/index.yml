@@ -1,0 +1,60 @@
+name: Rebuild Skill Index
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'skills/registry.json'
+      - 'src/templates/skills/**'
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: skill-index
+  cancel-in-progress: false
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    env:
+      AI_DEVKIT_BUDDY_HOME: ${{ runner.temp }}/ai-devkit-buddy-home
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      - run: npm ci
+      - run: npm run build
+
+      - name: Rebuild index
+        run: |
+          if [ -f skills/index.json ]; then cp skills/index.json "$RUNNER_TEMP/index.before.json"; fi
+          node bin/cli.js skill rebuild-index --output skills/index.json
+
+      - name: Detect content changes
+        id: diff
+        run: |
+          changed=$(node -e '
+            const fs = require("fs");
+            const content = (file) => fs.existsSync(file)
+              ? JSON.stringify(JSON.parse(fs.readFileSync(file, "utf8")).skills.map(({ name, registry, description }) => [registry, name, description]))
+              : null;
+            console.log(content(process.argv[1]) === content(process.argv[2]) ? "false" : "true");
+          ' "$RUNNER_TEMP/index.before.json" skills/index.json)
+          echo "changed=$changed" >> "$GITHUB_OUTPUT"
+          echo "Index content changed: $changed"
+
+      - name: Commit index
+        if: steps.diff.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add skills/index.json
+          git commit -m "chore: rebuild skill index"
+          git push

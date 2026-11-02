@@ -1,3 +1,3 @@
-import { cli } from "./cli";
+import { createProgram } from "./cli";
 
-cli.parse();
+createProgram().parseAsync(process.argv);
